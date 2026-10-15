@@ -1,20 +1,25 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
 android {
     namespace 'com.yitube4k.agecalculator'
     compileSdk 34
+
     defaultConfig {
         applicationId 'com.yitube4k.agecalculator'
         minSdk 24
         targetSdk 34
-        kotlinOptions {
-            jvmTarget = '17'
-        }
-        compileOptions {
-            JavaVersion VERSION_17
-        }
     }
-    buildFeatures {
-        viewBinding false
-        dataBinding false
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
     }
 }
 
