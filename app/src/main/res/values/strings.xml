@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">HelloAgent</string>
-    <string name="hello_msg">Hello from Autonomous Agent!</string>
+    <string name="app_name">AgeCalculator</string>
+    <string name="date_selected">%1$s</string>
+    <string name="age_calculated">আপনার বয়স: %1$d বছর, %2$d মাস, %3$d দিন</string>
+    <string name="days_lived">আপনি পর্ম্পূর্ণ %1$d দিন জীবনযাপন করেছেন এবং আজ থেকে %2$d দিন পরে আপনার আগের জন্মদিন হবে</string>
 </resources>
