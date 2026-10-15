@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>বয়স ক্যালকুলেটর</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 550px;
+            padding: 30px;
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            color: #333333;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            color: #4a5568;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            color: #2d3748;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input[type="date"]:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-calc {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            border: none;
+            padding: 13px;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-calc:hover {
+            opacity: 0.95;
+        }
+
+        .btn-calc:active {
+            transform: scale(0.98);
+        }
+
+        .error-message {
+            display: none;
+            margin-top: 20px;
+            padding: 12px 16px;
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            color: #c53030;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 25px;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .primary-card {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 14px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .primary-card .title {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .primary-card .main-age {
+            font-size: 22px;
+            color: #2b6cb0;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-card .label {
+            font-size: 13px;
+            color: #718096;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .value {
+            font-size: 18px;
+            color: #2d3748;
+            font-weight: 700;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: span 1;
+            }
+
+            .primary-card .main-age {
+                font-size: 19px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>বয়স ক্যালকুলেটর</h1>
+        <div class="input-group">
+            <label for="birthDate">আপনার জন্মতারিখ নির্বাচন করুন</label>
+            <input type="date" id="birthDate">
+        </div>
+        <button class="btn-calc" onclick="calculateAge()">বয়স গণনা করুন</button>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="result-section" id="resultSection">
+            <div class="primary-card">
+                <div class="title">আপনার বর্তমান বয়স</div>
+                <div class="main-age" id="ageDisplay">-</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="label">মোট অতিবাহিত দিন</div>
+                    <div class="value" id="totalDaysDisplay">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">পরবর্তী জন্মদিন বাকি</div>
+                    <div class="value" id="nextBirthdayDisplay">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">জন্মবার</div>
+                    <div class="value" id="birthDayOfWeekDisplay">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">পরবর্তী জন্মদিনবার</div>
+                    <div class="value" id="nextBirthdayOfWeekDisplay">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">মোট হৃদস্পন্দন (মিনিটে ৭২ বার)</div>
+                    <div class="value" id="heartbeatsDisplay">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">মোট শ্বাস-প্রশ্বাস (মিনিটে ১৬ বার)</div>
+                    <div class="value" id="breathsDisplay">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const weekdaysBengali = [
+            'রবিবার',
+            'সোমবার',
+            'মঙ্গলবার',
+            'বুধবার',
+            'বৃহস্পতিবার',
+            'শুক্রবার',
+            'শনিবার'
+        ];
+
+        function toBengali(num) {
+            const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+            return num.toString().replace(/\d/g, d => bengaliDigits[parseInt(d, 10)]);
+        }
+
+        function formatBengaliLargeNumber(num) {
+            if (num >= 10000000) {
+                const croreVal = (num / 10000000).toFixed(2);
+                return `${toBengali(croreVal)} কোটি+`;
+            } else if (num >= 100000) {
+                const lakhVal = (num / 100000).toFixed(2);
+                return `${toBengali(lakhVal)} লাখ+`;
+            } else {
+                return `${toBengali(Math.round(num).toLocaleString('en-US'))}+`;
+            }
+        }
+
+        function isLeapYear(year) {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        }
+
+        function getDaysInMonth(year, monthIndex) {
+            return new Date(year, monthIndex + 1, 0).getDate();
+        }
+
+        function calculateAge() {
+            const dateInput = document.getElementById('birthDate').value;
+            const errorElement = document.getElementById('errorMessage');
+            const resultElement = document.getElementById('resultSection');
+
+            if (!dateInput) {
+                errorElement.innerText = 'অনুগ্রহ করে একটি সঠিক জন্মতারিখ নির্বাচন করুন।';
+                errorElement.style.display = 'block';
+                resultElement.style.display = 'none';
+                return;
+            }
+
+            const parts = dateInput.split('-');
+            const birthYear = parseInt(parts[0], 10);
+            const birthMonth = parseInt(parts[1], 10) - 1;
+            const birthDay = parseInt(parts[2], 10);
+
+            const birthMidnight = new Date(birthYear, birthMonth, birthDay);
+
+            const now = new Date();
+            const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            if (birthMidnight.getTime() > todayMidnight.getTime()) {
+                errorElement.innerText = 'ভবিষ্যতের তারিখ নির্বাচন করা সম্ভব নয়। সঠিক তারিখ দিন।';
+                errorElement.style.display = 'block';
+                resultElement.style.display = 'none';
+                return;
+            }
+
+            errorElement.style.display = 'none';
+
+            let curYear = todayMidnight.getFullYear();
+            let curMonth = todayMidnight.getMonth();
+            let curDay = todayMidnight.getDate();
+
+            let years = curYear - birthYear;
+            let months = curMonth - birthMonth;
+            let days = curDay - birthDay;
+
+            if (days < 0) {
+                let prevMonth = curMonth - 1;
+                let prevYear = curYear;
+                if (prevMonth < 0) {
+                    prevMonth = 11;
+                    prevYear--;
+                }
+                const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
+                days += daysInPrevMonth;
+                months--;
+            }
+
+            if (months < 0) {
+                months += 12;
+                years--;
+            }
+
+            const totalDaysLived = Math.floor((todayMidnight.getTime() - birthMidnight.getTime()) / 86400000);
+
+            let nextYear = curYear;
+            let nextTargetDate = resolveBirthdayDate(nextYear, birthMonth, birthDay);
+
+            if (nextTargetDate.getTime() < todayMidnight.getTime()) {
+                nextYear++;
+                nextTargetDate = resolveBirthdayDate(nextYear, birthMonth, birthDay);
+            }
+
+            const daysUntilNext = Math.round((nextTargetDate.getTime() - todayMidnight.getTime()) / 86400000);
+
+            const birthDayOfWeek = weekdaysBengali[birthMidnight.getDay()];
+            const nextDayOfWeek = weekdaysBengali[nextTargetDate.getDay()];
+
+            const totalMinutes = totalDaysLived * 24 * 60;
+            const heartbeats = totalMinutes * 72;
+            const breaths = totalMinutes * 16;
+
+            document.getElementById('ageDisplay').innerText =
+                `${toBengali(years)} বছর, ${toBengali(months)} মাস, ${toBengali(days)} দিন`;
+
+            document.getElementById('totalDaysDisplay').innerText = `${toBengali(totalDaysLived)} দিন`;
+
+            if (daysUntilNext === 0) {
+                document.getElementById('nextBirthdayDisplay').innerText = 'আজ আপনার জন্মদিন!';
+            } else {
+                document.getElementById('nextBirthdayDisplay').innerText = `${toBengali(daysUntilNext)} দিন বাকি`;
+            }
+
+            document.getElementById('birthDayOfWeekDisplay').innerText = birthDayOfWeek;
+            document.getElementById('nextBirthdayOfWeekDisplay').innerText = nextDayOfWeek;
+            document.getElementById('heartbeatsDisplay').innerText = formatBengaliLargeNumber(heartbeats);
+            document.getElementById('breathsDisplay').innerText = formatBengaliLargeNumber(breaths);
+
+            resultElement.style.display = 'block';
+        }
+
+        function resolveBirthdayDate(targetYear, birthMonth, birthDay) {
+            if (birthMonth === 1 && birthDay === 29) {
+                if (isLeapYear(targetYear)) {
+                    return new Date(targetYear, 1, 29);
+                } else {
+                    return new Date(targetYear, 2, 1);
+                }
+            }
+            return new Date(targetYear, birthMonth, birthDay);
+        }
+    </script>
+</body>
+</html>
