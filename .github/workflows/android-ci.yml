@@ -74,18 +74,7 @@ jobs:
           api-level: 29
           arch: x86_64
           script: |
-            PKG=$(grep -oP "applicationId\s*[\"']\K[^\"']+" app/build.gradle | head -1); echo "Detected package: $PKG"; [ -n "$PKG" ] || exit 1
-            adb install -r apk/app-debug.apk && echo "APK INSTALLED"
-            sleep 3
-            adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1
-            echo "App launched, waiting 25s..."
-            sleep 25
-            adb shell pidof "$PKG" && echo "PROCESS RUNNING" || echo "PROCESS NOT RUNNING"
-            adb logcat -d > full_logcat.txt
-            adb exec-out screencap -p > screenshot.png || true
-            grep -q "FATAL EXCEPTION" full_logcat.txt && { echo "APP CRASHED - FATAL EXCEPTION DETECTED"; grep -A 40 "FATAL EXCEPTION" full_logcat.txt | head -80; exit 1; } || true
-            grep -q "Fatal signal" full_logcat.txt && { echo "APP CRASHED - NATIVE FATAL SIGNAL"; grep -A 20 "Fatal signal" full_logcat.txt | head -40; exit 1; } || true
-            adb shell pidof "$PKG" > /dev/null && echo "NO_CRASH_DETECTED - app runs fine" || { echo "APP PROCESS DIED (no exception logged)"; exit 1; }
+            PKG=$(grep -oP "applicationId\s*[\"']\K[^\"']+" app/build.gradle | head -1); echo "Detected package: $PKG"; [ -z "$PKG" ] && { echo "FAILED: no applicationId in app/build.gradle"; exit 1; }; adb install -r apk/app-debug.apk && echo "APK INSTALLED"; sleep 3; adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1; echo "App launched, waiting 25s..."; sleep 25; adb shell pidof "$PKG" && echo "PROCESS RUNNING" || echo "PROCESS NOT RUNNING"; adb logcat -d > full_logcat.txt; adb exec-out screencap -p > screenshot.png || true; grep -q "FATAL EXCEPTION" full_logcat.txt && { echo "APP CRASHED - FATAL EXCEPTION DETECTED"; grep -A 40 "FATAL EXCEPTION" full_logcat.txt | head -80; exit 1; } || true; grep -q "Fatal signal" full_logcat.txt && { echo "APP CRASHED - NATIVE FATAL SIGNAL"; grep -A 20 "Fatal signal" full_logcat.txt | head -40; exit 1; } || true; adb shell pidof "$PKG" > /dev/null && echo "NO_CRASH_DETECTED - app runs fine" || { echo "APP PROCESS DIED (no exception logged)"; exit 1; }
 
       - name: Upload logcat + screenshot
         if: always()
