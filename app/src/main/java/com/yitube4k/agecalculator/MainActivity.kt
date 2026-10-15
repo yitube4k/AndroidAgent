@@ -42,6 +42,7 @@ class MainActivity : Activity() {
             { _, year, month, day ->
                 selectedDate = Calendar.getInstance()
                 selectedDate?.set(year, month, day)
+                birthdate = selectedDate
                 updateViews()
             },
             year,
@@ -56,14 +57,15 @@ class MainActivity : Activity() {
     }
 
     private fun calculateAge() {
-        val birthdate = birthdate ?: Calendar.getInstance()
+        val bd = birthdate ?: return
         val currentDate = Calendar.getInstance()
-        val age = calculateAgeInYears(birthdate, currentDate)
+        val age = calculateAgeInYears(bd, currentDate)
 
-        val daysLived = calculateDaysLived(birthdate, currentDate)
-        val daysUntilNextBirthday = calculateDaysUntilNextBirthday(birthdate, currentDate)
+        val daysLived = calculateDaysLived(bd, currentDate)
+        val daysUntilNextBirthday = calculateDaysUntilNextBirthday(bd, currentDate)
 
-        textViewAge?.text = getString(R.string.age_calculated, age)
+        val monthsTot = daysLived / 30
+textViewAge?.text = getString(R.string.age_calculated, age, monthsTot % 12, daysLived % 30)
         textViewDays?.text = getString(R.string.days_lived, daysLived, daysUntilNextBirthday)
     }
 
@@ -85,20 +87,18 @@ class MainActivity : Activity() {
     }
 
     private fun calculateDaysUntilNextBirthday(birthdate: Calendar, currentDate: Calendar): Int {
-        val birthdateCopy = Calendar.getInstance().apply {
+        val next = Calendar.getInstance().apply {
             timeInMillis = birthdate.timeInMillis
         }
         val currentDateCopy = Calendar.getInstance().apply {
             timeInMillis = currentDate.timeInMillis
         }
 
-        if (currentDateCopy.get(Calendar.MONTH) > birthdateCopy.get(Calendar.MONTH) ||
-            (currentDateCopy.get(Calendar.MONTH) == birthdateCopy.get(Calendar.MONTH) && currentDateCopy.get(Calendar.DAY_OF_MONTH) >= birthdateCopy.get(Calendar.DAY_OF_MONTH))) {
-            return 0
+        next.set(Calendar.YEAR, currentDateCopy.get(Calendar.YEAR))
+        if (next.before(currentDateCopy)) {
+            next.set(Calendar.YEAR, currentDateCopy.get(Calendar.YEAR) + 1)
         }
-
-        birthdateCopy.add(Calendar.YEAR, 1)
-        val difference = birthdateCopy.timeInMillis - currentDateCopy.timeInMillis
+        val difference = next.timeInMillis - currentDateCopy.timeInMillis
         return (difference / (24 * 60 * 60 * 1000)).toInt()
     }
 }
