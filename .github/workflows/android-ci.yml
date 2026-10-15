@@ -74,15 +74,19 @@ jobs:
           api-level: 29
           arch: x86_64
           script: |
-            set -x
-            AAPT=$(ls $ANDROID_HOME/build-tools/*/aapt | head -1)
-            PKG=$("$AAPT" dump badging apk/app-debug.apk | grep "package:" | head -1 | sed "s/.*package:'\([^']*\)'.*/\1/")
+            set -e
+            PKG=$(grep -oP "applicationId\s*[\"']\K[^\"']+" app/build.gradle | head -1)
+            if [ -z "$PKG" ]; then
+              echo "FAILED: could not detect applicationId in app/build.gradle"
+              exit 1
+            fi
             echo "Detected package: $PKG"
             adb install -r apk/app-debug.apk
             sleep 3
             adb shell monkey -p "$PKG" -c android.intent.category.LAUNCHER 1
             echo "App launched, waiting 25s..."
             sleep 25
+            adb shell pidof "$PKG" && echo "PROCESS RUNNING" || echo "PROCESS NOT RUNNING"
             adb logcat -d > full_logcat.txt
             adb exec-out screencap -p > screenshot.png || true
             if grep -q "FATAL EXCEPTION" full_logcat.txt; then
@@ -91,9 +95,17 @@ jobs:
               grep -A 40 "FATAL EXCEPTION" full_logcat.txt | head -80
               echo "=========================================="
               exit 1
-            else
-              echo "NO_CRASH_DETECTED - app runs fine"
             fi
+            if grep -q "Fatal signal" full_logcat.txt; then
+              echo "APP CRASHED - NATIVE FATAL SIGNAL"
+              grep -A 20 "Fatal signal" full_logcat.txt | head -40
+              exit 1
+            fi
+            if ! adb shell pidof "$PKG" > /dev/null; then
+              echo "APP PROCESS DIED (no exception logged)"
+              exit 1
+            fi
+            echo "NO_CRASH_DETECTED - app runs fine"
 
       - name: Upload logcat + screenshot
         if: always()
